@@ -1,3 +1,10 @@
+sudo docker run -d --name my-container --user nobody image:latest sleep 6000
+
+run script
+
+docker exec -i my-container whoami
+
+
 To create and run a Jenkins pipeline using the Jenkins CLI without access to the Jenkins UI (such as in a HackerRank environment), you'll need to use command-line approaches. Here's how to do this:
 
 ## Setting up the Jenkins CLI
