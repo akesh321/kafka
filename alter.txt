@@ -1,0 +1,130 @@
+To create and run a Jenkins pipeline using the Jenkins CLI without access to the Jenkins UI (such as in a HackerRank environment), you'll need to use command-line approaches. Here's how to do this:
+
+## Setting up the Jenkins CLI
+
+1. First, download the Jenkins CLI JAR file:
+```bash
+wget http://your-jenkins-server/jnlpJars/jenkins-cli.jar
+```
+
+2. Set up authentication (you'll need your Jenkins credentials):
+```bash
+java -jar jenkins-cli.jar -s http://your-jenkins-server/ -auth username:password
+```
+
+## Creating a Jenkins Pipeline
+
+1. Create a Jenkinsfile in your project directory with your pipeline code:
+```groovy
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building the application'
+                // Add your build commands here
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running tests'
+                // Add your test commands here
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application'
+                // Add your deployment commands here
+            }
+        }
+    }
+}
+```
+
+2. Create a new pipeline job using the CLI:
+```bash
+cat > job.xml << 'EOL'
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job">
+  <description>Pipeline created via CLI</description>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition">
+    <scm class="hudson.plugins.git.GitSCM">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>https://your-git-repo-url.git</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/main</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <scriptPath>Jenkinsfile</scriptPath>
+    </scm>
+  </definition>
+</flow-definition>
+EOL
+
+java -jar jenkins-cli.jar -s http://your-jenkins-server/ create-job my-pipeline-job < job.xml
+```
+
+## Running the Pipeline
+
+To run the pipeline job you just created:
+
+```bash
+java -jar jenkins-cli.jar -s http://your-jenkins-server/ build my-pipeline-job -v
+```
+
+The `-v` flag enables verbose output so you can see the build progress.
+
+## Alternatively: Create an Inline Pipeline Script
+
+If you can't access a Git repository, you can create an inline pipeline script:
+
+```bash
+cat > inline-job.xml << 'EOL'
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job">
+  <description>Inline Pipeline created via CLI</description>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition">
+    <script>
+      pipeline {
+        agent any
+        stages {
+          stage('Build') {
+            steps {
+              echo 'Building the application'
+            }
+          }
+          stage('Test') {
+            steps {
+              echo 'Running tests'
+            }
+          }
+          stage('Deploy') {
+            steps {
+              echo 'Deploying the application'
+            }
+          }
+        }
+      }
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+</flow-definition>
+EOL
+
+java -jar jenkins-cli.jar -s http://your-jenkins-server/ create-job inline-pipeline < inline-job.xml
+```
+
+## Getting Job Status and Output
+
+To check the status of your builds:
+
+```bash
+java -jar jenkins-cli.jar -s http://your-jenkins-server/ console my-pipeline-job
+```
+
+Would you like me to elaborate on any specific part of this process?​​​​​​​​​​​​​​​​
