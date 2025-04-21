@@ -1,0 +1,83 @@
+pipeline {
+    agent any
+
+    environment {
+        TOPIC = 'test-topic'
+    }
+
+    stages {
+        stage('Kafka Producer') {
+            steps {
+                echo "Producing message to Kafka topic: ${TOPIC}"
+                sh 'python3 producer.py'
+            }
+        }
+        stage('Kafka Consumer') {
+            steps {
+                echo "Consuming message from Kafka topic: ${TOPIC}"
+                sh 'python3 consumer.py'
+            }
+        }
+    }
+}
+
+
+from kafka import KafkaProducer
+
+producer = KafkaProducer(bootstrap_servers='localhost:9092')
+producer.send('test-topic', b'Hello from Jenkins pipeline')
+producer.flush()
+
+from kafka import KafkaConsumer
+
+consumer = KafkaConsumer('test-topic', bootstrap_servers='localhost:9092',
+                         auto_offset_reset='earliest', group_id='jenkins-group')
+for message in consumer:
+    print(f"Received message: {message.value.decode()}")
+    break  # Exit after one message
+
+
+
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <description>Kafka producer-consumer test pipeline</description>
+  <keepDependencies>false</keepDependencies>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+    <script>
+      pipeline {
+          agent any
+          environment {
+              TOPIC = 'test-topic'
+          }
+          stages {
+              stage('Kafka Producer') {
+                  steps {
+                      echo "Producing message to Kafka topic: ${TOPIC}"
+                      sh 'python3 producer.py'
+                  }
+              }
+              stage('Kafka Consumer') {
+                  steps {
+                      echo "Consuming message from Kafka topic: ${TOPIC}"
+                      sh 'python3 consumer.py'
+                  }
+              }
+          }
+      }
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+</flow-definition>
+
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ create-job kafka-pipeline < pipeline-job.xml
+
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ build kafka-pipeline
+
+
+wget http://localhost:8080/jnlpJars/jenkins-cli.jar
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:1234567890abcdef create-job kafka-pipeline < pipeline-job.xml
+
