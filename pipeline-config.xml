@@ -2,29 +2,32 @@
 <flow-definition plugin="workflow-job">
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
     <script>
-pipeline {
-    agent any
-    stages {
-        stage('Clone') {
-            steps {
-                git 'https://github.com/<your-user>/kafka-demo.git'
-            }
-        }
-        stage('Run Producer') {
-            steps {
-                sh 'python3 producer.py'
-            }
-        }
-        stage('Run Consumer') {
-            steps {
-                sh 'python3 consumer.py'
-            }
-        }
-    }
-}
+                pipeline {
+                              agent any
+                              environment {
+                                 TOPIC= 'test'
+                              }
+
+                                     stages {
+                                         stage('Clone') {
+                                             steps {
+                                                      git 'https://github.com/<your-user>/kafka-demo.git'
+                                                   }
+                                             }
+                                         stage('Run Producer') {
+                                              steps {
+                                                       sh 'python3 producer.py'
+                                                     }
+                                                 }
+                                         stage('Run Consumer') {
+                                              steps {
+                                                       sh 'python3 consumer.py'
+                                                     }
+                                                 }
+                                             }
+                          }
     </script>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
 </flow-definition>
-
