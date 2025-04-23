@@ -1,0 +1,24 @@
+select table_schema,table_name,engine,data_length,index_length,data_length +index_length as total_size,((data_length +index_length)/1024/1024) as size_in_mb from information_schema.tables where table_schema='cache_db' and table_name='cache_data';
+
+
+udo apt install mysql-server -y
+sudo mysql_secure_installation
+
+create table cache_data ( id INT AUTO_INCREMENT PRIMARY KEY, key_name VARCHAR(255), value VARCHAR(255) ) ENGINE=MEMORY; SHOW TABLE STATUS LIKE 'cache_data';
+
+SHOW TABLE STATUS from cache_db LIKE 'cache_data';
+
+INSERT into cache_data (key_name,value) VALUES ('user1','value1');
+
+
+
+select table_name,engine from information_schema.tables where table_schema='cache_db' and table_name='cache_data';
+
+ SHOW TABLE STATUS from cache_db LIKE 'cache_data' \G;
+
+
+
+
+
+
+sudo vi /lib/systemd/system/jenkins.service

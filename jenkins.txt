@@ -1,0 +1,65 @@
+sudo java -jar jenkins-cli.jar  -s  http://localhost:8080/ -auth admin:8b682233f9694077bb16fb9cf0de48f8 console kafka-pipeline 
+
+sudo java -jar jenkins-cli.jar  -s  http://localhost:8080/ -auth admin:8b682233f9694077bb16fb9cf0de48f8 build kafka-pipeline 
+sudo java -jar jenkins-cli.jar  -s  http://localhost:8080/ -auth admin:8b682233f9694077bb16fb9cf0de48f8 create-job kafka-pipeline <jobs-config.xml 
+
+sudo java -jar jenkins-cli.jar  -s  http://localhost:8080/ -auth admin:8b682233f9694077bb16fb9cf0de48f8 delete-job kafka-pipeline 
+
+ll /var/lib/jenkins/jobs/
+
+ll /var/lib/jenkins/jobs/kafka-pipeline/
+
+sudo pip3 install kafka-python
+sudo apt install -y python3 python3-pip
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:8b682233f9694077bb16fb9cf0de48f8 who-am-i  
+
+
+sudo wget https://archive.apache.org/dist/kafka/3.6.0/kafka_2.13-3.6.0.tgz
+
+$ sudo wget http://localhost:8080/jnlpJars/jenkins-cli.jar
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+sudo systemctl daemon-reexec
+
+sudo vi /lib/systemd/system/jenkins.service  -->port
+
+sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/jenkins.key] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list'
+
+sudo chmod a+r /usr/share/keyrings/jenkins.key
+
+sudo wget -q -O /usr/share/keyrings/jenkins.key https://pkg.jenkins.io/debian/jenkins.io.key
+
+sudo wget -q -O -https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+
+
+
+
+
+
+
+bin/kafka-server-start.sh config/server.properties > kafka.log 2>&1 &
+# Step 3: Create Kafka Topic
+bin/kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+# Step 4: Set Up Jenkins Pipeline with Kafka Producer/Consumer
+# Create Jenkinsfile for the pipeline
+cat <<EOL > Jenkinsfile
+pipeline {
+agent any
+stages {
+stage('Build') {
+steps {
+echo 'Building Kafka Producer/Consumer...'
+}
+}
+stage('Deploy') {
+steps {
+echo 'Deploying Kafka Producer/Consumer...'
+sh 'echo "message from producer" | bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic'
+sh 'bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning > /path/to/kafka-consumer-output.log'
+}
+}
+}
+}

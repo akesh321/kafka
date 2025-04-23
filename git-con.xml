@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <actions/>
+    <description>Kafka Producer-Consumer Pipeline</description>
+    <keepDependencies>false</keepDependencies>
+
+    <!-- Git SCM Config -->
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@4.13.3">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <url>https://github.com/your-username/your-repo.git</url>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>*/main</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="empty-list"/>
+        <extensions/>
+    </scm>
+
+    <canRoam>false</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+
+    <builders>
+        <hudson.tasks.Shell>
+            <command>
+                #!/bin/bash
+                echo "Starting Zookeeper..."
+                nohup /home/ubuntu/kafka/bin/zookeeper-server-start.sh /home/ubuntu/kafka/config/zookeeper.properties > /home/ubuntu/zookeeper.log 2>&1 &
+                sleep 5
+
+                echo "Starting Kafka Broker..."
+                nohup /home/ubuntu/kafka/bin/kafka-server-start.sh /home/ubuntu/kafka/config/server.properties > /home/ubuntu/kafka.log 2>&1 &
+                sleep 10
+
+                echo "Running Kafka Producer..."
+                python3 producer.py
+
+                echo "Running Kafka Consumer..."
+                python3 consumer.py
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+
+    <publishers/>
+    <buildWrappers/>
+</project>
