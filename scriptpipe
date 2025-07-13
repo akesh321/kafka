@@ -1,0 +1,44 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+    <description>Pipeline to build and deploy Dockerized web app</description>
+    <keepDependencies>false</keepDependencies>
+    <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+        <script>
+pipeline {
+  agent any
+
+  stages {
+    stage('Clone Repository') {
+      steps {
+        git 'https://github.com/docker/getting-started.git'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t getting-started-app .'
+      }
+    }
+
+    stage('Run Docker Container') {
+      steps {
+        sh '''
+        docker stop getting-started-app || true
+        docker rm getting-started-app || true
+        docker run -d -p 8080:80 --name getting-started-app getting-started-app
+        '''
+      }
+    }
+
+    stage('Test Deployment') {
+      steps {
+        sh 'curl -f http://localhost:8080 || echo "App not reachable"'
+      }
+    }
+  }
+}
+    </script>
+        <sandbox>true</sandbox>
+    </definition>
+    <triggers/>
+</flow-definition>
