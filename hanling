@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+    stages {
+        stage('Clone Repo') {
+            steps {
+                script {
+                    try {
+                        echo 'Trying to clone repo...'
+                        git 'https://github.com/docker/getting-started.git'
+                        echo 'Clone success.'
+                    } catch (err) {
+                        echo "Git clone failed: ${err}"
+                        error("Clone step failed.")
+                    }
+                }
+            }
+        }
+        stage('Check Files') {
+            steps {
+                sh 'ls -l'
+            }
+        }
+    }
+}
