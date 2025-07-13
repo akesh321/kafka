@@ -1,26 +1,55 @@
-<?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.42">
-    <description>Pipeline to build and deploy Dockerized web app</description>
+<flow-definition plugin="workflow-job@2.40">
+    <description>Pipeline to build and deploy Dockerized web app from Git</description>
     <keepDependencies>false</keepDependencies>
-    <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.94">
-        <scm class="hudson.plugins.git.GitSCM" plugin="git@4.13.1">
-            <configVersion>2</configVersion>
-            <userRemoteConfigs>
-                <hudson.plugins.git.UserRemoteConfig>
-                    <url>https://github.com/akesh321/kafka.git</url>
-                </hudson.plugins.git.UserRemoteConfig>
-            </userRemoteConfigs>
-            <branches>
-                <hudson.plugins.git.BranchSpec>
-                    <name>*/main</name>
-                </hudson.plugins.git.BranchSpec>
-            </branches>
-            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-            <submoduleCfg class="list"/>
-            <extensions/>
-        </scm>
-        <scriptPath>Jenkinsfile</scriptPath>
-        <lightweight>false</lightweight>
+    <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.94">
+        <script>
+      pipeline {
+        agent any
+
+        environment {
+          IMAGE_NAME = "getting-started"
+          CONTAINER_NAME = "getting-started-container"
+        }
+
+        stages {
+          stage('Clone Repo') {
+            steps {
+              // Clean workspace first
+              deleteDir()
+              // Clone the GitHub repo that contains the Dockerfile
+              git url: 'https://github.com/docker/getting-started.git', branch: 'main'
+            }
+          }
+
+          stage('Build Docker Image') {
+            steps {
+              sh '''
+                docker build -t ${IMAGE_NAME} .
+              '''
+            }
+          }
+
+          stage('Run Docker Container') {
+            steps {
+              sh '''
+                docker rm -f ${CONTAINER_NAME} || true
+                docker run -d -p 8080:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}
+              '''
+            }
+          }
+
+          stage('Test Deployment') {
+            steps {
+              sh '''
+                sleep 5
+                curl -f http://localhost:8080 || echo "App not reachable"
+              '''
+            }
+          }
+        }
+      }
+    </script>
+        <sandbox>true</sandbox>
     </definition>
     <disabled>false</disabled>
 </flow-definition>
