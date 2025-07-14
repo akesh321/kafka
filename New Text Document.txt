@@ -2,6 +2,19 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
 ScriptApproval.get().approveSignature("method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object")
 
 
+
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
+
+def approval = ScriptApproval.get()
+approval.approveSignature("staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods readFile java.lang.String")
+approval.approveSignature("method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object")
+approval.approveSignature("method groovy.lang.GroovyObject evaluate java.lang.String")
+approval.approveSignature("method java.lang.String toString")
+
+
+
+
+
 pipeline {
     agent any
 
