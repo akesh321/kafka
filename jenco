@@ -1,0 +1,87 @@
+wget -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+
+ 
+
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+
+ 
+
+sudo systemctl status jenkins.service
+
+ 
+
+sudo apt install -y python3 python3-pip
+
+ 
+
+wget https://archive.apache.org/dist/kafka/3.0.0/kafka_2.13-3.0.0.tgz
+
+ 
+
+Caused: java.io.IOException: Unable to read /var/lib/jenkins/jobs/dockerized/config.xml
+
+sudo apt install openjdk-17-jdk -y
+
+ 
+
+sudo wget https://archive.apache.org/dist/kafka/3.2.1/kafka_2.13-3.2.1.tgz
+
+ 
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:a29b9f0d95b041949bd83f7610aea0eb create-job Jenkins-pipe
+
+ 
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:78c92447bdec4e4e85d1ec33bc5ffe9b build Jenkins-pipe
+
+ 
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ build Jenkinsfile
+
+ 
+
+wget http://localhost:8080/jnlpJars/jenkins-cli.jar
+
+ 
+
+/var/lib/jenkins/workspace/dockerized-app-pipeline
+
+ 
+
+sudo apt install -y docker.io
+
+ 
+
+sudo vi /etc/default/jenkins --change port
+
+ 
+
+sudo systemctl start jenkins
+
+ 
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:1c1712946aa34639828f0a72e59229fd install-plugin workflow-aggregator
+
+ 
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:861622146ff745e6a2d56259dd5cc153 safe-restart
+
+ 
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:7dad59d56a654443a7185611fce7fdc1 create-job dockerized-app-pipeline < config.xml
+
+ 
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:7dad59d56a654443a7185611fce7fdc1 create-job dockerized-app-pipeline < config.xml
+
+ 
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:78c92447bdec4e4e85d1ec33bc5ffe9b build dockerized-app-pipeline -s -v
+
+ 
+
+sudo usermod -aG docker jenkins
+
+ 
+
+id jenkins
