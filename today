@@ -1,0 +1,76 @@
+cat <<EOF > dockerized-app-pipeline.xml
+<flow-definition plugin="workflow-job">
+<description>Pipeline for Dockerized Web App</description>
+<keepDependencies>false</keepDependencies>
+<definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps">
+<scm class="hudson.plugins.git.GitSCM" plugin="git">
+<configVersion>2</configVersion>
+<userRemoteConfigs>
+<hudson.plugins.git.UserRemoteConfig>
+<url>https://github.com/docker/getting-started.git</url>
+</hudson.plugins.git.UserRemoteConfig>
+</userRemoteConfigs>
+<branches>
+<hudson.plugins.git.BranchSpec>
+<name>*/master</name>
+</hudson.plugins.git.BranchSpec>
+</branches>
+</scm>
+<scriptPath>Jenkinsfile</scriptPath>
+<lightweight>true</lightweight>
+</definition>
+<triggers/>
+</flow-definition>
+EOF
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:caf7ec8ba3d843a4b2c1e827bf2dd37b create-job dockerized-app-pipeline < dockerized-app-pipeline.xml
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:caf7ec8ba3d843a4b2c1e827bf2dd37b install-plugin workflow-aggregator git  -restart
+
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:<YOUR_ADMIN_TOKEN> create-job dockerized-app-pipeline < dockerized-app-pipeline.xml
+
+
+
+sudo apt update
+sudo apt install -y openjdk-17-jdk
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+ /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/jenkinsusr/share/keyrings/jenkins-keyring.asc] \ https://pkg.jenkins.io/debian binary/ | sudo tee \
+ /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+sudo apt install -y jenkins
+sudo systemctl enable jenkins
+sudo systemctl start 
+
+
+only docker build
+<flow-definition plugin="workflow-job">
+<description>Build and deploy Dockerized web app</description>
+<keepDependencies>false</keepDependencies>
+<definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+<script>pipeline { agent any
+stages {
+stage('Build Docker Image') {
+steps { sh 'docker build -t dockerized-app /var/lib/jenkins/workspace/dockerized-app' }
+}
+stage('Run Docker Container') {
+steps {
+sh 'docker rm -f dockerized-app || true'
+sh 'docker run -d -p 8080:80 --name dockerized-app dockerized-app'
+}
+}
+stage('Verify Deployment') {
+steps { sh 'curl -I http://localhost:8080' }
+}
+}
+}</script>
+<sandbox>true</sandbox>
+</definition>
+<triggers>
+<hudson.triggers.SCMTrigger>
+<spec>* * * * *</spec> <!-- Poll every minute -->
+</hudson.triggers.SCMTrigger>
+</triggers>
+<disabled>false</disabled>
+</flow-definition>
