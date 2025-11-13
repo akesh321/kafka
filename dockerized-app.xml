@@ -1,0 +1,29 @@
+<flow-definition plugin="workflow-job">
+<description>Build and deploy Dockerized web app</description>
+<keepDependencies>false</keepDependencies>
+<definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+        <script>pipeline { agent any
+        stages {
+        stage('Build Docker Image') {
+        steps { sh 'docker build -t dockerized-app /var/lib/jenkins/workspace/dockerized-app' }
+        }
+        stage('Run Docker Container') {
+        steps {
+        sh 'docker rm -f dockerized-app || true'
+        sh 'docker run -d -p 8081:80 --name dockerized-app dockerized-app'
+        }
+        }
+        stage('Verify Deployment') {
+        steps { sh 'curl -I http://localhost:8081' }
+        }
+        }
+                }</script>
+        <sandbox>true</sandbox>
+</definition>
+<triggers>
+        <hudson.triggers.SCMTrigger>
+                <spec>* * * * *</spec> <!-- Poll every minute -->
+        </hudson.triggers.SCMTrigger>
+</triggers>
+<disabled>false</disabled>
+</flow-definition>
