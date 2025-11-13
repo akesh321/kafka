@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t dockerized-app .'
+                }
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Stop any old container
+                    sh 'docker rm -f dockerized-app || true'
+                    // Run a new one
+                    sh 'docker run -d -p 8080:80 --name dockerized-app dockerized-app'
+                }
+            }
+        }pipeline {
+            agent any
+            stages {
+                stage('Pull Code') {
+                    steps {
+                        git 'https://github.com/docker/getting-started.git'
+                    }
+                }
+                stage('Build Docker Image') {
+                    steps {
+                        script {
+                            sh 'docker build -t dockerized-webapp .'
+                        }
+                    }
+                }
+                stage('Run Docker Container') {
+                    steps {
+                        script {
+                            sh '''
+docker rm -f dockerized-webapp-container || true
+docker run -d -p 8080:80 --name dockerized-webapp-container dockerized-webapp
+'''
+                        }
+                    }
+                }
+                stage('Test Deployment') {
+                    steps {
+                        script {
+                            sh 'sleep 5'
+                            sh 'curl -I http://localhost:8080'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh 'curl -I http://localhost:8080'
+                }
+            }
+        }
+    }
+    triggers {
+        // Auto trigger on file change (polling)
+        pollSCM('* * * * *') // checks every 1 minute for any file change
+    }
+}

@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t dockerized-app .'
+                }
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Stop any old container
+                    sh 'docker rm -f dockerized-app || true'
+                    // Run a new one
+                    sh 'docker run -d -p 8080:80 --name dockerized-app dockerized-app'
+                }
+            }
+        }
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh 'curl -I http://localhost:8080'
+                }
+            }
+        }
+    }
+    triggers {
+        // Auto trigger on file change (polling)
+        pollSCM('* * * * *') // checks every 1 minute for any file change
+    }
+}
