@@ -31,6 +31,20 @@ java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:caf7ec8ba3
 java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:<YOUR_ADMIN_TOKEN> create-job dockerized-app-pipeline < dockerized-app-pipeline.xml
 
 
+   1  13/11/25 02:49:50 docker ps
+    2  13/11/25 02:53:01 sudo apt update
+    3  13/11/25 02:53:58 sudo apt install -y ca-certificates curl gnupg lsb-release
+    4  13/11/25 02:55:23 sudo mkdir -p /etc/apt/keyrings
+    5  13/11/25 02:56:18 sudo docker ps
+    6  13/11/25 02:56:44 docker --version
+    7  13/11/25 02:56:56 sudo systemctl status docker
+    8  13/11/25 02:57:14 sudo usermod -aG docker jenkins
+    9  13/11/25 02:57:35 sudo systemctl status jenkins
+   10  13/11/25 03:00:36 systemctl status jenkins
+   11  13/11/25 03:00:40 systemctl status jenkins.service
+   12  13/11/25 03:01:05 service jenkins status
+
+
 
 sudo apt update
 sudo apt install -y openjdk-17-jdk
@@ -42,7 +56,12 @@ sudo apt update
 sudo apt install -y jenkins
 sudo systemctl enable jenkins
 sudo systemctl start 
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+sudo systemctl restart docker
 
+
+java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:caf7ec8ba3d843a4b2c1e827bf2dd37b install-plugin workflow-aggregator git  -restart
 
 only docker build
 <flow-definition plugin="workflow-job">
@@ -74,3 +93,21 @@ steps { sh 'curl -I http://localhost:8080' }
 </triggers>
 <disabled>false</disabled>
 </flow-definition>
+
+
+
+sudo java -jar jenkins-cli.jar -s http://localhost:8080/ -http -auth admin:caf7ec8ba3d843a4b2c1e827bf2dd37b build dockerized-app-pipeline -f
+sudo  vi /var/lib/jenkins/workspace/dockerized-app/Jenkinsfile
+sudo lsof -i :8080
+git config --global user.email "k.akeshkumar555@gmail.com"
+curl -X GET http://localhost:8080 -u admin:caf7ec8ba3d843a4b2c1e827bf2dd37b
+wget http://localhost:8080/jnlpJars/jenkins-cli.jar
+ sudo chown -R jenkins:jenkins /var/lib/jenkins/workspace/
+  192  13/11/25 04:36:28 sudo chmod -R 755 jenkins:jenkins /var/lib/jenkins/workspace/
+  193  13/11/25 04:36:38 sudo chmod -R 755  /var/lib/jenkins/workspace
+curl -I -u admin:caf7ec8ba3d843a4b2c1e827bf2dd37 http://localhost:8080
+sudo systemctl daemon-reload
+sudo systemctl status jenkins | grep "Loaded
+
+
+
